@@ -106,6 +106,20 @@ def create_app(
     async def health():
         return {"status": "ok"}
 
+    @app.get("/v1/models")
+    async def models(ctx: AppContext = Depends(get_ctx), _=Depends(require_key)):
+        return {
+            "object": "list",
+            "data": [
+                {
+                    "id": ctx.settings.model_name,
+                    "object": "model",
+                    "created": 0,
+                    "owned_by": "imgproxy",
+                }
+            ],
+        }
+
     @app.post("/v1/images/generations")
     async def generate(
         request: Request, ctx: AppContext = Depends(get_ctx), _=Depends(require_key)

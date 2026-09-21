@@ -339,3 +339,14 @@ def test_edit_n2_reuses_uploads_with_new_seeds(make_app):
     ]
     assert len(seeds) == 2
     assert seeds[0] != seeds[1]
+
+
+def test_models_endpoint(make_app):
+    c, _ = make_app()
+    with c:
+        r = c.get("/v1/models")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["object"] == "list"
+        assert body["data"][0]["id"] == "qwen-image-2.1"
+        assert body["data"][0]["owned_by"] == "imgproxy"
