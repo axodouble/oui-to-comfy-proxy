@@ -75,7 +75,7 @@ def create_app(
             if comfyui_client is None:
                 await client.aclose()
 
-    app = FastAPI(title="imgproxy", lifespan=lifespan)
+    app = FastAPI(title="oui-to-comfy-proxy", lifespan=lifespan)
 
     @app.exception_handler(RequestError)
     async def request_error_handler(request: Request, exc: RequestError):
@@ -115,7 +115,7 @@ def create_app(
                     "id": ctx.settings.model_name,
                     "object": "model",
                     "created": 0,
-                    "owned_by": "imgproxy",
+                    "owned_by": "oui-to-comfy-proxy",
                 }
             ],
         }
@@ -171,7 +171,7 @@ def create_app(
             ext = mimetypes.guess_extension(f.content_type or "") or ".png"
             return await ctx.comfyui.upload_image(
                 data,
-                f"imgproxy_{batch}_{i}{ext}",
+                f"oui-to-comfy-proxy_{batch}_{i}{ext}",
                 f.content_type or "application/octet-stream",
             )
 

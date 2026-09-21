@@ -92,7 +92,7 @@ def build_edit_graph(
         del graph[node_id]
 
     for i, filename in enumerate(image_filenames, start=1):
-        node_id = f"imgproxy_load_{i}"
+        node_id = f"oui-to-comfy-proxy_load_{i}"
         graph[node_id] = {
             "inputs": {"image": filename},
             "class_type": "LoadImage",

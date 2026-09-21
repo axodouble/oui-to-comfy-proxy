@@ -1,4 +1,4 @@
-from imgproxy.config import load_settings
+from oui-to-comfy-proxy.config import load_settings
 
 
 def test_defaults():

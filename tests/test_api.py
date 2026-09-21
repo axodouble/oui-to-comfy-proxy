@@ -7,9 +7,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from imgproxy.comfyui import ComfyUIClient
-from imgproxy.config import load_settings
-from imgproxy.main import create_app
+from oui-to-comfy-proxy.comfyui import ComfyUIClient
+from oui-to-comfy-proxy.config import load_settings
+from oui-to-comfy-proxy.main import create_app
 
 WORKFLOWS = Path(__file__).parent.parent / "workflows"
 PNG = b"\x89PNG\r\n\x1a\nfake"
@@ -263,7 +263,7 @@ def test_edit_single_image_part(make_app):
         assert len(body["data"]) == 1
         assert base64.b64decode(body["data"][0]["b64_json"]) == PNG
     assert len(state["uploads"]) == 1
-    assert state["uploads"][0].startswith("imgproxy_")
+    assert state["uploads"][0].startswith("oui-to-comfy-proxy_")
     graph = state["prompts"][0]
     text = next(n for n in graph.values() if n["class_type"] == "TextEncodeQwenImage21")
     assert "images.image_1" in text["inputs"]
@@ -349,4 +349,4 @@ def test_models_endpoint(make_app):
         body = r.json()
         assert body["object"] == "list"
         assert body["data"][0]["id"] == "qwen-image-2.1"
-        assert body["data"][0]["owned_by"] == "imgproxy"
+        assert body["data"][0]["owned_by"] == "oui-to-comfy-proxy"

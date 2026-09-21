@@ -1,4 +1,4 @@
-# ImgProxy — OpenAI-compatible image proxy for Qwen Image 2.1 via ComfyUI
+# oui-to-comfy-proxy — OpenAI-compatible image proxy for Qwen Image 2.1 via ComfyUI
 
 Date: 2026-09-21
 Status: Approved design, pending spec review
@@ -83,14 +83,14 @@ Dependencies: `fastapi`, `uvicorn[standard]`, `httpx`, `python-multipart`.
 Dev: `pytest`, `pytest-asyncio` (or anyio), `httpx` (test transport).
 
 ```
-ImgProxy/
+oui-to-comfy-proxy/
   pyproject.toml
   .python-version
   README.md
   workflows/
     imagegen.json      # text-to-image template (from examples/imagegen.json)
     imageedit.json     # edit template (from examples/imageedit.json, seed fixed)
-  imgproxy/
+  oui-to-comfy-proxy/
     __init__.py
     config.py          # env-based settings
     comfyui.py         # async ComfyUI client
@@ -153,7 +153,7 @@ Request: multipart per §2.2. Handling:
    reference image's size, the user's validated setup). **Image order
    matters: image 1 determines output dimensions.**
 3. Upload all images to ComfyUI in parallel via `POST /upload/image`,
-   each renamed `imgproxy_{8-hex}_{i}{ext}` (ext from content type,
+   each renamed `oui-to-comfy-proxy_{8-hex}_{i}{ext}` (ext from content type,
    default `.png`) to avoid cross-request filename collisions;
    `overwrite=true`, no subfolder.
 4. Per run i in 1..n: graph = `build_edit_graph(prompt, "", filenames,
@@ -164,7 +164,7 @@ Request: multipart per §2.2. Handling:
 ### 4.3 `GET /v1/models`
 
 `{"object": "list", "data": [{"id": "<MODEL_NAME>", "object": "model",
-"created": 0, "owned_by": "imgproxy"}]}`
+"created": 0, "owned_by": "oui-to-comfy-proxy"}]}`
 
 ### 4.4 `GET /health`
 
@@ -195,9 +195,9 @@ re-numbered freely.
    matches `images.image_(\d+)`; record each linked source node ID.
 2. Delete recorded source nodes that are `LoadImage` and referenced by
    no other node (safety: if still referenced, leave it in place).
-3. For i in 1..N add node `imgproxy_load_{i}` =
+3. For i in 1..N add node `oui-to-comfy-proxy_load_{i}` =
    `{"inputs": {"image": "<uploaded filename>"}, "class_type": "LoadImage"}`
-   and wire `images.image_{i}` = `[imgproxy_load_{i}, 0]`.
+   and wire `images.image_{i}` = `[oui-to-comfy-proxy_load_{i}, 0]`.
 4. Set `prompt`, `negative_prompt` (`""`), and `KSampler.seed`.
 5. Leave `ComfySwitchNode` (`switch=false`), `ResolutionSelector`,
    `EmptyLatentImage`, `QwenImage21Cache`, loaders, and
@@ -236,7 +236,7 @@ always overwrites the seed, but the template should be valid on its own.
 | `PROXY_API_KEY` | *(unset = open)* | Required Bearer key when set |
 | `HOST` / `PORT` | `0.0.0.0` / `8000` | Bind address for the run script |
 
-Run: `uv run uvicorn imgproxy.main:app --host $HOST --port $PORT`.
+Run: `uv run uvicorn oui-to-comfy-proxy.main:app --host $HOST --port $PORT`.
 
 ## 8. Error summary
 

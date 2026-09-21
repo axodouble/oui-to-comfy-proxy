@@ -10,7 +10,7 @@ mapping any number of edit input images (1-16) onto the workflow's
 
     uv sync
     export COMFYUI_URL=http://127.0.0.1:8188
-    uv run uvicorn imgproxy.main:app --host 0.0.0.0 --port 8000
+    uv run uvicorn oui-to-comfy-proxy.main:app --host 0.0.0.0 --port 8000
 
 ## Configuration (environment)
 
