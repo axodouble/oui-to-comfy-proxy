@@ -6,7 +6,7 @@ def test_defaults():
     assert s.comfyui_url == "http://127.0.0.1:8188"
     assert s.model_name == "qwen-image-2.1"
     assert s.workflow_dir == "./workflows"
-    assert s.timeout == 600.0
+    assert s.timeout == 3600.0
     assert s.poll_interval == 0.5
     assert s.proxy_api_key is None
     assert s.host == "0.0.0.0"
