@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 from dataclasses import dataclass
@@ -37,3 +38,17 @@ def load_templates(workflow_dir: str | Path) -> Templates:
 
 def find_save_node_id(graph: dict) -> str:
     return _find_node(graph, "SaveImageAdvanced")
+
+
+def build_generation_graph(
+    template: dict, prompt: str, width: int, height: int, seed: int
+) -> dict:
+    graph = copy.deepcopy(template)
+    text = graph[_find_node(graph, "TextEncodeQwenImage21")]["inputs"]
+    text["prompt"] = prompt
+    text["resolution"] = max(width, height)
+    latent = graph[_find_node(graph, "EmptyLatentImage")]["inputs"]
+    latent["width"] = width
+    latent["height"] = height
+    graph[_find_node(graph, "KSampler")]["inputs"]["seed"] = seed
+    return graph
