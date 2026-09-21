@@ -7,9 +7,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from oui-to-comfy-proxy.comfyui import ComfyUIClient
-from oui-to-comfy-proxy.config import load_settings
-from oui-to-comfy-proxy.main import create_app
+from oui_to_comfy_proxy.comfyui import ComfyUIClient
+from oui_to_comfy_proxy.config import load_settings
+from oui_to_comfy_proxy.main import create_app
 
 WORKFLOWS = Path(__file__).parent.parent / "workflows"
 PNG = b"\x89PNG\r\n\x1a\nfake"
@@ -38,7 +38,7 @@ def comfyui_handler(state):
                 if n["class_type"] == "SaveImageAdvanced"
             )
             state["history"][prompt_id] = {
-                "prompt": [payload["prompt"], {}, 0, 0],
+                "prompt": [0, prompt_id, payload["prompt"], {}, []],
                 "status": {"status_str": "success", "completed": True},
                 "outputs": {
                     save_id: {

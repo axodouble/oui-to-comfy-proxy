@@ -1,0 +1,17 @@
+[Unit]
+Description=oui-to-comfy-proxy (OpenAI-compatible image proxy for ComfyUI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust these two paths if the repo lives somewhere other than /root/oui-to-comfy-proxy
+WorkingDirectory=/root/oui-to-comfy-proxy
+Environment=COMFYUI_URL=http://127.0.0.1:8188
+Environment=PROXY_API_KEY=change-me
+ExecStart=/root/oui-to-comfy-proxy/.venv/bin/uvicorn oui_to_comfy_proxy.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

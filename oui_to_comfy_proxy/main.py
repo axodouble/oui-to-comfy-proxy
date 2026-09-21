@@ -44,7 +44,7 @@ def _as_int(value) -> int | None:
 
 
 async def collect_outputs(ctx: AppContext, entry: dict) -> list[str]:
-    save_id = find_save_node_id(entry["prompt"][0])
+    save_id = find_save_node_id(entry["prompt"][2])
     saved = (entry.get("outputs", {}).get(save_id) or {}).get("images") or []
     if not saved:
         raise ComfyUIError("no saved images in output")

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from oui-to-comfy-proxy.templates import load_templates
+from oui_to_comfy_proxy.templates import load_templates
 
 WORKFLOWS = Path(__file__).parent.parent / "workflows"
 
@@ -32,7 +32,7 @@ def test_edit_template_seed_is_int():
 
 import copy
 
-from oui-to-comfy-proxy.templates import build_generation_graph
+from oui_to_comfy_proxy.templates import build_generation_graph
 
 
 def _id_by_type(graph, class_type):
@@ -61,7 +61,7 @@ def test_generation_does_not_mutate_template():
 
 import pytest
 
-from oui-to-comfy-proxy.templates import MAX_IMAGES, build_edit_graph
+from oui_to_comfy_proxy.templates import MAX_IMAGES, build_edit_graph
 
 
 def _image_nodes(g):

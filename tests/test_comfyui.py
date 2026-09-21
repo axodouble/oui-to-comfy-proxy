@@ -3,7 +3,7 @@ import re
 import httpx
 import pytest
 
-from oui-to-comfy-proxy.comfyui import ComfyUIClient, ComfyUIError, ComfyUITimeout
+from oui_to_comfy_proxy.comfyui import ComfyUIClient, ComfyUIError, ComfyUITimeout
 
 
 async def test_upload_image():

@@ -10,7 +10,16 @@ mapping any number of edit input images (1-16) onto the workflow's
 
     uv sync
     export COMFYUI_URL=http://127.0.0.1:8188
-    uv run uvicorn oui-to-comfy-proxy.main:app --host 0.0.0.0 --port 8000
+    uv run uvicorn oui_to_comfy_proxy.main:app --host 0.0.0.0 --port 8000
+
+## Running as a service (systemd)
+
+An example unit file is at `oui-to-comfy-proxy.service` (repo root). Copy it,
+set `COMFYUI_URL`, `PROXY_API_KEY`, and the two paths, then:
+
+    sudo cp oui-to-comfy-proxy.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now oui-to-comfy-proxy
 
 ## Configuration (environment)
 

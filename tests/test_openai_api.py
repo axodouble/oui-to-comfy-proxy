@@ -2,7 +2,12 @@ import base64
 
 import pytest
 
-from oui-to-comfy-proxy.openai_api import RequestError, image_response, parse_size, validate_n
+from oui_to_comfy_proxy.openai_api import (
+    RequestError,
+    image_response,
+    parse_size,
+    validate_n,
+)
 
 
 def test_parse_size_rounds_to_32():
