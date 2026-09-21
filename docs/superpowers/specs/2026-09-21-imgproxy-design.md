@@ -216,9 +216,10 @@ always overwrites the seed, but the template should be valid on its own.
 
 - One `httpx.AsyncClient`, base URL `COMFYUI_URL`, per-call timeout 30s.
 - `queue`: `POST /prompt` with a per-process random `client_id`.
-- `wait`: poll `GET /history/{prompt_id}` every 0.5s until the entry
-  appears and `status.status_str` is terminal (`success`/`error`), or
-  the per-request `TIMEOUT` elapses → timeout error.
+- `wait`: poll `GET /history/{prompt_id}` every `POLL_INTERVAL`
+  seconds (default 0.5) until the entry appears and
+  `status.status_str` is terminal (`success`/`error`), or the
+  per-request `TIMEOUT` elapses → timeout error.
 - Errors from ComfyUI (non-2xx, execution status `error`, missing
   output) map to 502 with the upstream message; timeout maps to 504.
 - ComfyUI unreachable on the first call of a request → 502.
@@ -231,6 +232,7 @@ always overwrites the seed, but the template should be valid on its own.
 | `MODEL_NAME` | `qwen-image-2.1` | Model ID served at `/v1/models` |
 | `WORKFLOW_DIR` | `./workflows` | Directory with the two template JSONs |
 | `TIMEOUT` | `600` | Max seconds to wait for a ComfyUI run |
+| `POLL_INTERVAL` | `0.5` | Seconds between `/history` polls |
 | `PROXY_API_KEY` | *(unset = open)* | Required Bearer key when set |
 | `HOST` / `PORT` | `0.0.0.0` / `8000` | Bind address for the run script |
 
