@@ -243,3 +243,99 @@ def test_health(make_app):
     c, _ = make_app()
     with c:
         assert c.get("/health").json() == {"status": "ok"}
+
+
+def test_edit_single_image_part(make_app):
+    c, state = make_app()
+    with c:
+        r = c.post(
+            "/v1/images/edits",
+            data={
+                "model": "qwen-image-2.1",
+                "prompt": "change it",
+                "size": "1024x1024",
+                "background": "auto",
+            },
+            files={"image": ("a.png", b"imgbytes", "image/png")},
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["data"]) == 1
+        assert base64.b64decode(body["data"][0]["b64_json"]) == PNG
+    assert len(state["uploads"]) == 1
+    assert state["uploads"][0].startswith("imgproxy_")
+    graph = state["prompts"][0]
+    text = next(n for n in graph.values() if n["class_type"] == "TextEncodeQwenImage21")
+    assert "images.image_1" in text["inputs"]
+    assert "images.image_10" not in text["inputs"]
+    loads = [n for n in graph.values() if n["class_type"] == "LoadImage"]
+    assert len(loads) == 1
+    assert text["inputs"]["prompt"] == "change it"
+
+
+def test_edit_multiple_image_parts_mapped_in_order(make_app):
+    c, state = make_app()
+    files = [
+        ("image[]", (f"im{i}.png", bytes([65 + i]), "image/png")) for i in range(5)
+    ]
+    with c:
+        r = c.post("/v1/images/edits", data={"prompt": "blend"}, files=files)
+        assert r.status_code == 200
+    graph = state["prompts"][0]
+    text = next(n for n in graph.values() if n["class_type"] == "TextEncodeQwenImage21")
+    names = [
+        graph[text["inputs"][f"images.image_{i}"][0]]["inputs"]["image"]
+        for i in range(1, 6)
+    ]
+    assert [name.rsplit("_", 1)[1] for name in names] == [
+        "1.png",
+        "2.png",
+        "3.png",
+        "4.png",
+        "5.png",
+    ]
+    assert sorted(state["uploads"]) == sorted(names)
+
+
+def test_edit_zero_images_rejected(make_app):
+    c, _ = make_app()
+    with c:
+        r = c.post("/v1/images/edits", data={"prompt": "x"})
+        assert r.status_code == 400
+
+
+def test_edit_too_many_images_rejected(make_app):
+    c, _ = make_app()
+    with c:
+        files = [("image[]", (f"im{i}.png", b"x", "image/png")) for i in range(17)]
+        r = c.post("/v1/images/edits", data={"prompt": "x"}, files=files)
+        assert r.status_code == 400
+        assert "16" in r.json()["detail"]
+
+
+def test_edit_missing_prompt_rejected(make_app):
+    c, _ = make_app()
+    with c:
+        r = c.post(
+            "/v1/images/edits", data={}, files={"image": ("a.png", b"x", "image/png")}
+        )
+        assert r.status_code == 400
+
+
+def test_edit_n2_reuses_uploads_with_new_seeds(make_app):
+    c, state = make_app()
+    with c:
+        r = c.post(
+            "/v1/images/edits",
+            data={"prompt": "x", "n": 2},
+            files={"image": ("a.png", b"imgbytes", "image/png")},
+        )
+        assert r.status_code == 200
+        assert len(r.json()["data"]) == 2
+    assert len(state["uploads"]) == 1
+    seeds = [
+        next(n["inputs"]["seed"] for n in g.values() if n["class_type"] == "KSampler")
+        for g in state["prompts"]
+    ]
+    assert len(seeds) == 2
+    assert seeds[0] != seeds[1]

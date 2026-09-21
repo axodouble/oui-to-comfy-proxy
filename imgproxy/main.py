@@ -1,6 +1,10 @@
+import asyncio
 import base64
 import hmac
+import mimetypes
 import random
+import re
+import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,11 +16,15 @@ from .comfyui import ComfyUIError, ComfyUITimeout, ComfyUIClient
 from .config import Settings, load_settings
 from .openai_api import RequestError, image_response, parse_size, validate_n
 from .templates import (
+    MAX_IMAGES,
     Templates,
+    build_edit_graph,
     build_generation_graph,
     find_save_node_id,
     load_templates,
 )
+
+IMAGE_PART_RE = re.compile(r"^image(\[\d*\])?$")
 
 
 @dataclass
@@ -116,6 +124,50 @@ def create_app(
                 width,
                 height,
                 random.getrandbits(32),
+            )
+            prompt_id = await ctx.comfyui.queue(graph)
+            entry = await ctx.comfyui.wait(
+                prompt_id, ctx.settings.timeout, ctx.settings.poll_interval
+            )
+            b64_list.extend(await collect_outputs(ctx, entry))
+        return image_response(b64_list)
+
+    @app.post("/v1/images/edits")
+    async def edit(
+        request: Request, ctx: AppContext = Depends(get_ctx), _=Depends(require_key)
+    ):
+        form = await request.form()
+        prompt = form.get("prompt")
+        if not prompt or not str(prompt).strip():
+            raise RequestError("prompt is required")
+        n = validate_n(_as_int(form.get("n")))
+        files = [
+            v
+            for k, v in form.multi_items()
+            if not isinstance(v, str) and IMAGE_PART_RE.match(k)
+        ]
+        if not files:
+            raise RequestError("at least one image is required")
+        if len(files) > MAX_IMAGES:
+            raise RequestError(f"at most {MAX_IMAGES} images are supported")
+        batch = uuid.uuid4().hex[:8]
+
+        async def upload(i: int, f) -> str:
+            data = await f.read()
+            ext = mimetypes.guess_extension(f.content_type or "") or ".png"
+            return await ctx.comfyui.upload_image(
+                data,
+                f"imgproxy_{batch}_{i}{ext}",
+                f.content_type or "application/octet-stream",
+            )
+
+        filenames = list(
+            await asyncio.gather(*[upload(i, f) for i, f in enumerate(files, start=1)])
+        )
+        b64_list = []
+        for _ in range(n):
+            graph = build_edit_graph(
+                ctx.templates.edit, str(prompt), "", filenames, random.getrandbits(32)
             )
             prompt_id = await ctx.comfyui.queue(graph)
             entry = await ctx.comfyui.wait(
