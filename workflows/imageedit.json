@@ -224,8 +224,8 @@
     "inputs": {
       "switch": false,
       "on_false": [
-        "459:474",
-        2
+        "459:486",
+        0
       ],
       "on_true": [
         "459:456",
@@ -255,7 +255,7 @@
     "inputs": {
       "prompt": "Modify the text on the cup. Change the handwritten lettering from \"QWEN 2.1 ROAST\" to \"ROASTED IN TOKYO\". Keep the exact same font style, ink texture, paper cup material, and shallow depth of field lighting unchanged.",
       "negative_prompt": "",
-      "resolution": 0,
+      "resolution": 1024,
       "clip": [
         "459:453",
         0
@@ -308,6 +308,18 @@
     "class_type": "TextEncodeQwenImage21",
     "_meta": {
       "title": "Text Encode Qwen Image 2.1"
+    }
+  },
+  "459:486": {
+    "inputs": {
+      "value": [
+        "459:474",
+        2
+      ]
+    },
+    "class_type": "UnloadAllModels",
+    "_meta": {
+      "title": "Unload models before sampling"
     }
   }
 }

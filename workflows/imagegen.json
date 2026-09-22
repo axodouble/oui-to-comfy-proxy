@@ -98,7 +98,7 @@
         1
       ],
       "latent_image": [
-        "474",
+        "480",
         0
       ]
     },
@@ -126,6 +126,18 @@
     "class_type": "UnloadAllModels",
     "_meta": {
       "title": "UnloadAllModels"
+    }
+  },
+  "480": {
+    "inputs": {
+      "value": [
+        "474",
+        0
+      ]
+    },
+    "class_type": "UnloadAllModels",
+    "_meta": {
+      "title": "Unload models before sampling"
     }
   }
 }
